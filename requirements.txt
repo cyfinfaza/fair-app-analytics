@@ -4,3 +4,4 @@ dnspython
 flask
 python-dotenv
 certifi
+flask_cors

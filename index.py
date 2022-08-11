@@ -1,5 +1,6 @@
 from json import load
 from flask import Flask, request, Response
+from flask_cors import CORS
 import pymongo
 from dotenv import load_dotenv
 import os
@@ -11,6 +12,7 @@ from countPlatformsPvt import countPlatforms
 
 load_dotenv()
 app = Flask(__name__)
+CORS(app)
 
 MONGODB_CONN_STR = os.environ["MONGODB_CONN_STR"]
 
