@@ -20,20 +20,37 @@
 				width: 100vw;
 				height: 100vh;
 				display: flex;
+				flex-direction: column;
 				align-items: center;
 				justify-content: center;
-				gap: 3em;
-				flex-wrap: wrap;
-			}
-
-			body > div {
-				display: flex;
-				flex-direction: column;
-				gap: 8px;
+				gap: 0.8em;
 				text-align: center;
 			}
 
-			body > div > * {
+			img {
+				width: 5em;
+			}
+
+			h1 {
+				font-size: 3.5em;
+				margin: 0;
+			}
+
+			main {
+				display: flex;
+				flex-direction: row;
+				gap: 3em;
+				flex-wrap: wrap;
+				justify-content: center;
+			}
+
+			div {
+				display: flex;
+				flex-direction: column;
+				text-align: center;
+			}
+
+			div > * {
 				margin: 0;
 			}
 
@@ -42,7 +59,7 @@
 			}
 
 			#status {
-				position: absolute;
+				position: fixed;
 				bottom: 0.5em;
 				right: 0.5em;
 				font-size: small;
@@ -56,15 +73,19 @@
 	</head>
 
 	<body>
-		<div>
-			<h1 id="dauNumber" class="bigNumber">-</h1>
-			<p style="font-size: 2em">users today</p>
-		</div>
-		<div>
-			<h1 id="poprxNumber" class="bigNumber">-</h1>
-			<p style="font-size: 2em">currently online</p>
-			<code id="status">disconnected</code>
-		</div>
+		<img src="https://sc4hfair.app/favicon.svg" />
+		<h1>Fair App Statistics</h1>
+		<main>
+			<div>
+				<h1 id="dauNumber" class="bigNumber">-</h1>
+				<p style="font-size: 2em">users today</p>
+			</div>
+			<div>
+				<h1 id="poprxNumber" class="bigNumber">-</h1>
+				<p style="font-size: 2em">currently online</p>
+				<code id="status">disconnected</code>
+			</div>
+		</main>
 	</body>
 
 	<script>
