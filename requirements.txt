@@ -1,0 +1,5 @@
+user_agents
+pymongo
+dnspython
+flask
+python-dotenv

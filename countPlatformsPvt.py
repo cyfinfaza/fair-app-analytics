@@ -1,29 +1,35 @@
 import pymongo
 from user_agents import parse
 
-conn_str = input("MongoDB connection string: ")
 
-client = pymongo.MongoClient(conn_str)
+def countPlatforms(collection):
+    agents = {}
 
-db = client["analytics"]
-collection = db["sessions"]
+    documents = collection.find()
+    for document in documents:
+        if document["agent"] in agents:
+            agents[document["agent"]] += 1
+        else:
+            agents[document["agent"]] = 1
 
-agents = {}
+    platforms = {}
 
-documents = collection.find()
-for document in documents:
-    if document["agent"] in agents:
-        agents[document["agent"]] += 1
-    else:
-        agents[document["agent"]] = 1
+    for agent in agents:
+        platform = parse(agent).os.family
+        if platform in platforms:
+            platforms[platform] += agents[agent]
+        else:
+            platforms[platform] = agents[agent]
 
-platforms = {}
+    return platforms
 
-for agent in agents:
-    platform = parse(agent).os.family
-    if platform in platforms:
-        platforms[platform] += agents[agent]
-    else:
-        platforms[platform] = agents[agent]
 
-print(platforms)
+if __name__ == "__main__":
+
+    conn_str = input("MongoDB connection string: ")
+
+    client = pymongo.MongoClient(conn_str)
+
+    db = client["analytics"]
+
+    print(countPlatforms(db["sessions"]))
