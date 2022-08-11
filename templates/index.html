@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Somerset County 4-H Fair App Statistics</title>
+
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&display=swap" rel="stylesheet" />
+		<style>
+			body {
+				background: #111;
+				color: #eee;
+				font-family: 'DM Sans', sans-serif;
+				margin: 0;
+				padding: 8px;
+				box-sizing: border-box;
+				width: 100vw;
+				height: 100vh;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				gap: 3em;
+				flex-wrap: wrap;
+			}
+
+			body > div {
+				display: flex;
+				flex-direction: column;
+				gap: 8px;
+				text-align: center;
+			}
+
+			body > div > * {
+				margin: 0;
+			}
+
+			.bigNumber {
+				font-size: 7em;
+			}
+
+			#status {
+				position: absolute;
+				bottom: 0.5em;
+				right: 0.5em;
+				font-size: small;
+				opacity: 0.8;
+				color: #2d5;
+			}
+			#status:not(.connected) {
+				color: #b00020;
+			}
+		</style>
+	</head>
+
+	<body>
+		<div>
+			<h1 id="dauNumber" class="bigNumber">-</h1>
+			<p style="font-size: 2em">users today</p>
+		</div>
+		<div>
+			<h1 id="poprxNumber" class="bigNumber">-</h1>
+			<p style="font-size: 2em">currently online</p>
+			<code id="status">disconnected</code>
+		</div>
+	</body>
+
+	<script>
+		// daily active users
+		const updateDau = () => {
+			let date = new Date();
+			date.setHours(0, 0, 0, 0);
+			fetch('/api/uniqueUsersPvt?since=' + date.toISOString().replace('Z', ''), { cahce: 'no-store' })
+				.then((response) => response.json())
+				.then((data) => {
+					console.log('dau:', data.data);
+					document.getElementById('dauNumber').innerText = data.data;
+				})
+				.catch((error) => {
+					console.error(error);
+				});
+		};
+		updateDau();
+		// setInterval(updateDau, 10000);
+
+		// poprx
+		const client = new WebSocket('wss://fair-app-poprx.4hcomputers.club/');
+		client.onmessage = (event) => {
+			const data = JSON.parse(event.data);
+			console.log('poprx:', data);
+			if (data.type === 'pop') document.getElementById('poprxNumber').innerText = data.data;
+			updateDau();
+		};
+		client.onopen = (event) => {
+			document.getElementById('status').innerText = 'connected';
+			document.getElementById('status').classList.add('connected');
+		};
+		client.onclose = (event) => {
+			document.getElementById('status').innerText = 'disconnected';
+			document.getElementById('status').classList.remove('connected');
+		};
+	</script>
+</html>

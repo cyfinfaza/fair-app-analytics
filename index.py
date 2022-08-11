@@ -1,5 +1,5 @@
 from json import load
-from flask import Flask, request, Response
+from flask import Flask, request, Response, render_template
 from flask_cors import CORS
 import pymongo
 from dotenv import load_dotenv
@@ -26,7 +26,7 @@ def success_json(data):
 
 @app.route('/')
 def index():
-    return "hi"
+    return render_template('index.html')
 
 
 @app.route('/api/uniqueUsersPvt')
