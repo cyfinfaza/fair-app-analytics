@@ -3,12 +3,10 @@ import time
 import datetime
 
 
-def countUniqueUsers(collection, sinceHours):
+def countUniqueUsers(collection, since):
     # fetch documents from past 24 hours
-    if not sinceHours == None:
-        start = datetime.datetime.utcnow() - datetime.timedelta(hours=sinceHours)
-        end = datetime.datetime.utcnow()
-        documents = collection.find({"t": {"$gte": start}})
+    if not since == None:
+        documents = collection.find({"t": {"$gte": since}})
     else:
         documents = collection.find()
 

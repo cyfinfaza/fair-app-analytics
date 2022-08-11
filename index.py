@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 import os
 import json
 import certifi
+import datetime
 from countUniqueUsersPvt import countUniqueUsers
 from countPlatformsPvt import countPlatforms
 
@@ -28,11 +29,16 @@ def index():
 
 @app.route('/api/uniqueUsersPvt')
 def uniqueUsersPvt():
+    since = None
     try:
-        sinceHoursAgo = int(request.args.get("sinceHoursAgo"))
+        if 'since' in request.args:
+            since = datetime.datetime.fromisoformat(request.args['since'])
+        elif 'sinceHoursAgo' in request.args:
+            since = datetime.datetime.utcnow(
+            ) - datetime.timedelta(hours=int(request.args['sinceHoursAgo']))
     except:
-        sinceHoursAgo = None
-    return success_json(str(countUniqueUsers(db["requests"], sinceHoursAgo)))
+        since = None
+    return success_json(str(countUniqueUsers(db["requests"], since)))
 
 
 @app.route("/api/platformsPvt")
