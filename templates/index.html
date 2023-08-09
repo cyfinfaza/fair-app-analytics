@@ -35,6 +35,10 @@
 				font-size: 3.5em;
 				margin: 0;
 			}
+			h2 {
+				font-size: 2em;
+				margin: 0;
+			}
 
 			main {
 				display: flex;
@@ -44,13 +48,13 @@
 				justify-content: center;
 			}
 
-			div {
+			main div {
 				display: flex;
 				flex-direction: column;
 				text-align: center;
 			}
 
-			div > * {
+			main div > * {
 				margin: 0;
 			}
 
@@ -69,12 +73,30 @@
 			#status:not(.connected) {
 				color: #b00020;
 			}
+
+			#canvas {
+				text-align: center;
+				image-rendering: crisp-edges;
+				image-rendering: pixelated;
+				width: 35em;
+				max-width: 90vw;
+			}
+			#canvasScale {
+				vertical-align: top;
+				font-size: 0.8em;
+				opacity: 0.2;
+			}
 		</style>
 	</head>
 
 	<body>
 		<img src="https://sc4hfair.app/favicon.svg" />
 		<h1>Fair App Statistics</h1>
+		{% if year == 2022 %}
+		<h2>4-H The Magic is Back!</h2>
+		{% elif year == 2023 %}
+		<h2>75 Years and Growing Strong!</h2>
+		{% endif %}
 		<main>
 			<div>
 				<h1 id="dauNumber" class="bigNumber">-</h1>
@@ -86,6 +108,10 @@
 				<code id="status">disconnected</code>
 			</div>
 		</main>
+		<div>
+			<canvas id="canvas" height="60" width="360"></canvas>
+			<span id="canvasScale">10</span>
+		</div>
 	</body>
 
 	<script>
@@ -106,21 +132,67 @@
 		updateDau();
 		// setInterval(updateDau, 10000);
 
+		let currentLiveUserCount = 0;
+
+		// poprx graph
+		const /** @type {HTMLCanvasElement} */ canvas = document.getElementById('canvas'),
+			ctx = canvas.getContext('2d');
+		let /** @type {number[]} */ popHistory = Array(canvas.width).fill(0),
+			graphInterval;
+		const drawGraph = () => {
+				const scale = Math.max(5, ...popHistory);
+				document.getElementById('canvasScale').innerText = scale;
+
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+				ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+				for (const [i, pop] of popHistory.entries()) {
+					const height = (pop * canvas.height) / scale;
+					ctx.fillRect(i, canvas.height - height, 1, height);
+				}
+			},
+			graphTick = () => {
+				drawGraph();
+				// add a new point to the graph for the next set of data
+				popHistory.shift();
+				popHistory.push(currentLiveUserCount);
+			};
+
 		// poprx
-		const client = new WebSocket('wss://fair-app-poprx.4hcomputers.club/');
-		client.onmessage = (event) => {
-			const data = JSON.parse(event.data);
-			console.log('poprx:', data);
-			if (data.type === 'pop') document.getElementById('poprxNumber').innerText = data.data;
-			updateDau();
+		const connectPoprx = () => {
+			console.log('connecting to poprx');
+			const client = new WebSocket('wss://fair-app-poprx.4hcomputers.club/');
+			window.client = client;
+
+			client.onmessage = (event) => {
+				const data = JSON.parse(event.data);
+				console.log('poprx:', data);
+				if (data.type === 'pop') {
+					currentLiveUserCount = data.data;
+					document.getElementById('poprxNumber').innerText = currentLiveUserCount;
+
+					// update latest graph item
+					popHistory[popHistory.length - 1] = Math.max(popHistory[popHistory.length - 1], parseInt(currentLiveUserCount));
+					drawGraph();
+				}
+				updateDau();
+			};
+			client.onopen = (event) => {
+				document.getElementById('status').innerText = 'connected';
+				document.getElementById('status').classList.add('connected');
+
+				// start filling up next graph item
+				graphInterval = setInterval(graphTick, 5_000);
+			};
+			client.onclose = (event) => {
+				document.getElementById('status').innerText = 'disconnected';
+				document.getElementById('status').classList.remove('connected');
+
+				clearInterval(graphInterval);
+
+				// try connecting again
+				setTimeout(connectPoprx, 5_000);
+			};
 		};
-		client.onopen = (event) => {
-			document.getElementById('status').innerText = 'connected';
-			document.getElementById('status').classList.add('connected');
-		};
-		client.onclose = (event) => {
-			document.getElementById('status').innerText = 'disconnected';
-			document.getElementById('status').classList.remove('connected');
-		};
+		connectPoprx();
 	</script>
 </html>
