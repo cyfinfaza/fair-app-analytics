@@ -8,6 +8,7 @@ import certifi
 import datetime
 from countUniqueUsersPvt import countUniqueUsers
 from countPlatformsPvt import countPlatforms
+from getScavengerHuntProgress import getScavengerHuntProgress
 
 load_dotenv()
 app = Flask(__name__)
@@ -41,6 +42,10 @@ def since_middleware():
 @app.route('/api/uniqueUsersPvt')
 def uniqueUsersPvt():
 	return success_json(countUniqueUsers(db["requests"], request.environ['since']))
+
+@app.route('/api/scavengerHuntProgressPvt')
+def scavengerHuntProgressPvt():
+	return success_json(getScavengerHuntProgress(db["requests"], request.environ['since']))
 
 @app.route("/api/platformsPvt")
 def platformsPvt():

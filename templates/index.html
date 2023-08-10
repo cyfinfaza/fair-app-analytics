@@ -8,23 +8,75 @@
 
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-		<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&display=swap" rel="stylesheet" />
+		<link
+			href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&display=swap"
+			rel="stylesheet"
+		/>
 		<style>
 			body {
 				background: #009959; /* #111 */
 				color: #eee;
-				font-family: 'DM Sans', sans-serif;
+				font-family: "DM Sans", sans-serif;
 				margin: 0;
 				padding: 8px;
 				box-sizing: border-box;
 				width: 100vw;
 				height: 100vh;
+				display: grid;
+				grid-template-columns: auto 1fr;
+			}
+
+			.stats {
 				display: flex;
 				flex-direction: column;
 				align-items: center;
 				justify-content: center;
 				gap: 0.8em;
 				text-align: center;
+			}
+
+			.sh {
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				align-items: flex-start;
+			}
+
+			.shGrid {
+				display: grid;
+				grid-template-columns: auto auto;
+				font-size: 2em;
+				column-gap: 8px;
+			}
+
+			.dots {
+				display: flex;
+				flex-direction: row;
+				gap: 8px;
+				align-items: center;
+			}
+
+			/* div.clueRow {
+				display: flex;
+				flex-direction: row;
+				align-items: center;
+				font-size: 2em;
+				gap: 8px;
+			} */
+
+			.shGrid > * {
+				margin: 0;
+			}
+
+			.shGrid p {
+				width: 1;
+				text-align: center;
+			}
+
+			.dot {
+				width: 1em;
+				height: 1em;
+				background-color: #eee;
 			}
 
 			img {
@@ -90,40 +142,92 @@
 	</head>
 
 	<body>
-		<img src="https://sc4hfair.app/favicon.svg" />
-		<h1>Fair App Statistics</h1>
-		{% if year == 2022 %}
-		<h2>4-H The Magic is Back!</h2>
-		{% elif year == 2023 %}
-		<h2>75 Years and Growing Strong!</h2>
-		{% endif %}
-		<main>
+		<div class="sh">
+			<h2>Scavenger Hunt</h2>
+			<div class="shGrid"></div>
+		</div>
+		<div class="stats">
+			<img src="https://sc4hfair.app/favicon.svg" />
+			<h1>Fair App Statistics</h1>
+			{% if year == 2022 %}
+			<h2>4-H The Magic is Back!</h2>
+			{% elif year == 2023 %}
+			<h2>75 Years and Growing Strong!</h2>
+			{% endif %}
+			<main>
+				<div>
+					<h1 id="dauNumber" class="bigNumber">-</h1>
+					<p style="font-size: 2em">users today</p>
+				</div>
+				<div>
+					<h1 id="poprxNumber" class="bigNumber">-</h1>
+					<p style="font-size: 2em">currently online</p>
+					<code id="status">disconnected</code>
+				</div>
+			</main>
 			<div>
-				<h1 id="dauNumber" class="bigNumber">-</h1>
-				<p style="font-size: 2em">users today</p>
+				<canvas id="canvas" height="60" width="360"></canvas>
+				<span id="canvasScale">10</span>
 			</div>
-			<div>
-				<h1 id="poprxNumber" class="bigNumber">-</h1>
-				<p style="font-size: 2em">currently online</p>
-				<code id="status">disconnected</code>
-			</div>
-		</main>
-		<div>
-			<canvas id="canvas" height="60" width="360"></canvas>
-			<span id="canvasScale">10</span>
 		</div>
 	</body>
 
 	<script>
+		const updateScavengerHuntProgress = () => {
+			let date = new Date();
+			date.setHours(0, 0, 0, 0);
+			fetch(
+				"/api/scavengerHuntProgressPvt?since=" +
+					date.toISOString().replace("Z", ""),
+				{ cahce: "no-store" }
+			)
+				.then((response) => response.json())
+				.then((data) => {
+					console.log("sh:", data.data);
+					let clientsAtEachIndex = new Array(data.data.totalClues)
+						.fill(null)
+						.map(() => []);
+					Object.entries(data.data.shIndexOfClients).forEach(([key, value]) =>
+						clientsAtEachIndex[value].push(key)
+					);
+					console.log(clientsAtEachIndex);
+					const html = `
+					${clientsAtEachIndex
+						.map(
+							(clients, index) => `
+							<p>${index + 1}&Tab;</p>
+							<div class="dots">
+								${clients
+									.map(
+										(clientId) =>
+											`<img class="dot" src="https://api.dicebear.com/6.x/identicon/svg?seed=${clientId}"></img>`
+									)
+									.join("")}
+							</div>
+						`
+						)
+						.join("\n")}
+					`;
+					document.querySelector("div.shGrid").innerHTML = html;
+				})
+				.catch((error) => {
+					console.error(error);
+				});
+		};
+		updateScavengerHuntProgress();
+
 		// daily active users
 		const updateDau = () => {
 			let date = new Date();
 			date.setHours(0, 0, 0, 0);
-			fetch('/api/uniqueUsersPvt?since=' + date.toISOString().replace('Z', ''), { cahce: 'no-store' })
+			fetch(
+				"/api/uniqueUsersPvt?since=" + date.toISOString().replace("Z", ""),
+				{ cahce: "no-store" }
+			)
 				.then((response) => response.json())
 				.then((data) => {
-					console.log('dau:', data.data);
-					document.getElementById('dauNumber').innerText = data.data;
+					console.log("dau:", data.data);
+					document.getElementById("dauNumber").innerText = data.data;
 				})
 				.catch((error) => {
 					console.error(error);
@@ -135,16 +239,17 @@
 		let currentLiveUserCount = 0;
 
 		// poprx graph
-		const /** @type {HTMLCanvasElement} */ canvas = document.getElementById('canvas'),
-			ctx = canvas.getContext('2d');
+		const /** @type {HTMLCanvasElement} */ canvas =
+				document.getElementById("canvas"),
+			ctx = canvas.getContext("2d");
 		let /** @type {number[]} */ popHistory = Array(canvas.width).fill(0),
 			graphInterval;
 		const drawGraph = () => {
 				const scale = Math.max(5, ...popHistory);
-				document.getElementById('canvasScale').innerText = scale;
+				document.getElementById("canvasScale").innerText = scale;
 
 				ctx.clearRect(0, 0, canvas.width, canvas.height);
-				ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+				ctx.fillStyle = "rgba(255, 255, 255, 0.5)";
 				for (const [i, pop] of popHistory.entries()) {
 					const height = (pop * canvas.height) / scale;
 					ctx.fillRect(i, canvas.height - height, 1, height);
@@ -159,33 +264,46 @@
 
 		// poprx
 		const connectPoprx = () => {
-			console.log('connecting to poprx');
-			const client = new WebSocket('wss://fair-app-poprx.4hcomputers.club/');
+			console.log("connecting to poprx");
+			const client = new WebSocket(
+				"wss://fair-app-poprx.4hcomputers.club/full"
+			);
 			window.client = client;
 
 			client.onmessage = (event) => {
 				const data = JSON.parse(event.data);
-				console.log('poprx:', data);
-				if (data.type === 'pop') {
+				console.log("poprx:", data);
+				if (data.type === "pop") {
 					currentLiveUserCount = data.data;
-					document.getElementById('poprxNumber').innerText = currentLiveUserCount;
+					document.getElementById("poprxNumber").innerText =
+						currentLiveUserCount;
 
 					// update latest graph item
-					popHistory[popHistory.length - 1] = Math.max(popHistory[popHistory.length - 1], parseInt(currentLiveUserCount));
+					popHistory[popHistory.length - 1] = Math.max(
+						popHistory[popHistory.length - 1],
+						parseInt(currentLiveUserCount)
+					);
 					drawGraph();
 				}
 				updateDau();
+				if (
+					data.type == "log" &&
+					data.data.type == "pathUpdate" &&
+					data.data.path?.path == "/scavenger-hunt"
+				) {
+					updateScavengerHuntProgress();
+				}
 			};
 			client.onopen = (event) => {
-				document.getElementById('status').innerText = 'connected';
-				document.getElementById('status').classList.add('connected');
+				document.getElementById("status").innerText = "connected";
+				document.getElementById("status").classList.add("connected");
 
 				// start filling up next graph item
 				graphInterval = setInterval(graphTick, 5_000);
 			};
 			client.onclose = (event) => {
-				document.getElementById('status').innerText = 'disconnected';
-				document.getElementById('status').classList.remove('connected');
+				document.getElementById("status").innerText = "disconnected";
+				document.getElementById("status").classList.remove("connected");
 
 				clearInterval(graphInterval);
 
