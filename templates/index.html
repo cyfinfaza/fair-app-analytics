@@ -236,6 +236,7 @@
 				});
 		};
 		updateScavengerHuntProgress();
+		setInterval(updateScavengerHuntProgress, 120_000);
 
 		// daily active users
 		const updateDau = () => {
