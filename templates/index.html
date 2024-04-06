@@ -174,6 +174,8 @@
 			<h2>4-H The Magic is Back!</h2>
 			{% elif year == 2023 %}
 			<h2>75 Years and Growing Strong!</h2>
+			{% elif year == 2024 %}
+			<h2>4-H Fairytale!</h2>
 			{% endif %}
 			<main>
 				<div>
@@ -193,27 +195,19 @@
 		</div>
 	</body>
 
+	{% raw %}
 	<script>
 		const updateScavengerHuntProgress = () => {
 			let date = new Date();
 			date.setHours(0, 0, 0, 0);
-			fetch(
-				"/api/scavengerHuntProgressPvt?since=" +
-					date.toISOString().replace("Z", ""),
-				{ cahce: "no-store" }
-			)
+			fetch("/api/scavengerHuntProgressPvt?since=" + date.toISOString(), {
+				cahce: "no-store",
+			})
 				.then((response) => response.json())
-				.then((data) => {
+				.then((/** @type {{status: string, data: string[][]}} */ data) => {
 					console.log("sh:", data.data);
-					let clientsAtEachIndex = new Array(data.data.totalClues)
-						.fill(null)
-						.map(() => []);
-					Object.entries(data.data.shIndexOfClients).forEach(([key, value]) =>
-						clientsAtEachIndex[value].push(key)
-					);
-					console.log(clientsAtEachIndex);
 					const html = `
-					${clientsAtEachIndex
+					${data.data
 						.map(
 							(clients, index) => `
 							<p>${index + 1}&Tab;</p>
@@ -242,10 +236,9 @@
 		const updateDau = () => {
 			let date = new Date();
 			date.setHours(0, 0, 0, 0);
-			fetch(
-				"/api/uniqueUsersPvt?since=" + date.toISOString().replace("Z", ""),
-				{ cahce: "no-store" }
-			)
+			fetch("/api/uniqueUsersPvt?since=" + date.toISOString(), {
+				cahce: "no-store",
+			})
 				.then((response) => response.json())
 				.then((data) => {
 					console.log("dau:", data.data);
@@ -335,4 +328,5 @@
 		};
 		connectPoprx();
 	</script>
+	{% endraw %}
 </html>

@@ -4,19 +4,18 @@ import pymongo
 from dotenv import load_dotenv
 import os
 import json
-import certifi
 import datetime
 from countUniqueUsersPvt import countUniqueUsers
 from countPlatformsPvt import countPlatforms
 from getScavengerHuntProgress import getScavengerHuntProgress
 
-load_dotenv()
 app = Flask(__name__)
 CORS(app)
 
+load_dotenv()
 MONGODB_CONN_STR = os.environ["MONGODB_CONN_STR"]
 
-client = pymongo.MongoClient(MONGODB_CONN_STR, tlsCAFile=certifi.where())
+client = pymongo.MongoClient(MONGODB_CONN_STR)
 db = client["analytics"]
 
 def success_json(data):
@@ -32,7 +31,7 @@ def since_middleware():
 	since = None
 	try:
 		if 'since' in request.args:
-			since = datetime.datetime.fromisoformat(request.args['since'])
+			since = datetime.datetime.fromisoformat(request.args['since'].replace('Z', ''))
 		elif 'sinceHoursAgo' in request.args:
 			since = datetime.datetime.utcnow() - datetime.timedelta(hours=float(request.args['sinceHoursAgo']))
 	except:

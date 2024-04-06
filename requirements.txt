@@ -1,7 +1,5 @@
-user_agents
-pymongo
-dnspython
-flask
-python-dotenv
-certifi
-flask_cors
+flask==3.0.2
+Flask-Cors==4.0.0
+pymongo==4.6.3
+python-dotenv==1.0.1
+user-agents==2.2.0
