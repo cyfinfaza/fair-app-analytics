@@ -5,11 +5,16 @@
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>Somerset County 4-H Fair App Statistics</title>
+		<link rel="icon" href="https://sc4hfair.app/favicon.ico" />
 
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 		<link
 			href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;700&display=swap"
+			rel="stylesheet"
+		/>
+		<link
+			href="https://fonts.googleapis.com/icon?family=Material+Icons&display=block"
 			rel="stylesheet"
 		/>
 		<style>
@@ -119,6 +124,9 @@
 			.bigNumber {
 				font-size: 7em;
 			}
+			.bigNumber + p {
+				font-size: 2em;
+			}
 
 			#status {
 				position: fixed;
@@ -143,6 +151,25 @@
 				vertical-align: top;
 				font-size: 0.8em;
 				opacity: 0.2;
+			}
+
+			#webpush {
+				position: fixed;
+				bottom: 0.5em;
+				margin: 0 auto;
+				font-size: 2em;
+				display: flex;
+				flex-direction: row;
+				gap: 2em;
+			}
+			#webpush > div {
+				display: flex;
+				flex-direction: row;
+				align-items: center;
+				gap: 0.25em;
+			}
+			#webpush .material-icons {
+				font-size: 1.5em;
 			}
 
 			@media (max-width: 850px) {
@@ -180,12 +207,26 @@
 			<main>
 				<div>
 					<h1 id="dauNumber" class="bigNumber">-</h1>
-					<p style="font-size: 2em">users today</p>
+					<p>users today</p>
 				</div>
 				<div>
 					<h1 id="poprxNumber" class="bigNumber">-</h1>
-					<p style="font-size: 2em">currently online</p>
+					<p>currently online</p>
 					<code id="status">disconnected</code>
+				</div>
+				<div id="webpush">
+					<div>
+						<span class="material-icons">notifications_active</span>
+						<p id="subNumber">-</p>
+					</div>
+					<div>
+						<span class="material-icons">notification_important</span>
+						<p id="invSubNumber">-</p>
+					</div>
+					<div>
+						<span class="material-icons">notifications_off</span>
+						<p id="unSubNumber">-</p>
+					</div>
 				</div>
 			</main>
 			<div>
@@ -327,6 +368,24 @@
 			};
 		};
 		connectPoprx();
+
+		const updateSubscribed = () => {
+			fetch("https://sc4hfair.app/api/webpush", {
+				cahce: "no-store",
+			})
+				.then((response) => response.json())
+				.then((data) => {
+					document.getElementById("subNumber").innerText = data.subscriptions;
+					document.getElementById("invSubNumber").innerText =
+						data.invalidSubscriptions;
+					document.getElementById("unSubNumber").innerText = data.unsubscribed;
+				})
+				.catch((error) => {
+					console.error(error);
+				});
+		};
+		setInterval(updateSubscribed, 120_000);
+		updateSubscribed();
 	</script>
 	{% endraw %}
 </html>

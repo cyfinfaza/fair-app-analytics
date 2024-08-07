@@ -3,24 +3,29 @@ from pymongo.collection import Collection
 
 # todo: update for 2024
 codes = [
-	"om3p5j2t",
-	"5bb6wme7",
-	"2yg2u65x",
-	"90y23932",
-	"qhpz6ok3",
-	"j18pw7ro",
-	"60gj3ve5",
-	"y09vkc8f",
-	"w4rwdh9y",
-	"7joqi24d",
-	"kxnib0c3",
-	"4nwt0k6y",
-	"zzx3q0ry",
-	"25tu9o28",
-	"5o5w7mpg",
-	"2qj7zma6"
+	"ka1ho9h0",
+	"qjdjfjbd",
+	"brjx21ms",
+	"i38sbr6x",
+	"6k9yggkf",
+	"ro1khj99",
+	"d35eb1af",
+	"sip1mvmn",
+	"dtijjfy0",
+	"f1vrzfhx",
+	"e0oalvvq",
+	"5f9lnsp9",
+	"qsnqda7b",
+	"6i936v1s",
+	"zakfvnsm",
+	"zd1wjidv",
+	"7xwm9rm9",
+	"l9rgq8li",
+	"52twfi84",
+	"k9i8e6sd",
+	"f1vytlmj",
 ]
-codeMetaKey = "sh_2023_code"
+codeMetaKey = "sh_2024_code"
 
 def getScavengerHuntProgress(collection: Collection, since=None):
 	filter = {"meta": {codeMetaKey: {"$exists": True}}}
