@@ -49,6 +49,7 @@
 				flex-direction: column;
 				justify-content: center;
 				align-items: flex-start;
+				font-size: 0.75em;
 			}
 
 			.shGrid {
@@ -80,13 +81,12 @@
 			}
 
 			.shGrid p {
-				width: 1;
 				text-align: center;
 			}
 
 			.dot {
-				width: 1em;
-				height: 1em;
+				width: 0.75em;
+				height: 0.75em;
 				background-color: #eee;
 			}
 
@@ -271,10 +271,19 @@
 				});
 		};
 		updateScavengerHuntProgress();
-		setInterval(updateScavengerHuntProgress, 120_000);
+		setInterval(updateScavengerHuntProgress, 60_000);
 
 		// daily active users
+		/** @type {ReturnType<typeof setInterval>?} */
+		let dauInterval = null,
+			invalidateDau = true;
 		const updateDau = () => {
+			if (!invalidateDau) {
+				clearInterval(dauInterval);
+				dauInterval = null;
+				return;
+			}
+			invalidateDau = false;
 			let date = new Date();
 			date.setHours(0, 0, 0, 0);
 			fetch("/api/uniqueUsersPvt?since=" + date.toISOString(), {
@@ -290,7 +299,7 @@
 				});
 		};
 		updateDau();
-		// setInterval(updateDau, 10000);
+		setInterval(updateDau, 10_000);
 
 		let currentLiveUserCount = 0;
 
@@ -341,13 +350,18 @@
 					);
 					drawGraph();
 				}
-				updateDau();
+				// updateDau();
+				invalidateDau = true;
+				if (dauInterval === null) {
+					updateDau();
+					dauInterval = setInterval(updateDau, 5_000);
+				}
 				if (
 					data.type == "log" &&
 					data.data.type == "pathUpdate" &&
 					data.data.path?.path == "/scavenger-hunt"
 				) {
-					updateScavengerHuntProgress();
+					setTimeout(updateScavengerHuntProgress, 2_000);
 				}
 			};
 			client.onopen = (event) => {

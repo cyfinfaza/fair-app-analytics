@@ -28,10 +28,10 @@ codes = [
 codeMetaKey = "sh_2024_code"
 
 def getScavengerHuntProgress(collection: Collection, since=None):
-	filter = {"meta": {codeMetaKey: {"$exists": True}}}
+	filter = {f"meta.{codeMetaKey}": {"$exists": True}}
 	if not since == None:
 		filter["t"] = {"$gte": since}
-	documents = collection.find(filter).sort("t")
+	documents = collection.find(filter, projection={"_id": False, "track_id": True, f"meta.{codeMetaKey}": True}).sort("t")
 
 	shIndexOfClients: dict[str, int] = {}
 
