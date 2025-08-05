@@ -1,31 +1,24 @@
-import pymongo
 from pymongo.collection import Collection
 
-# todo: update for 2024
+# todo: make dynamic yearly (with centralized codes)
 codes = [
-	"ka1ho9h0",
-	"qjdjfjbd",
-	"brjx21ms",
-	"i38sbr6x",
-	"6k9yggkf",
-	"ro1khj99",
-	"d35eb1af",
-	"sip1mvmn",
-	"dtijjfy0",
-	"f1vrzfhx",
-	"e0oalvvq",
-	"5f9lnsp9",
-	"qsnqda7b",
-	"6i936v1s",
-	"zakfvnsm",
-	"zd1wjidv",
-	"7xwm9rm9",
-	"l9rgq8li",
-	"52twfi84",
-	"k9i8e6sd",
-	"f1vytlmj",
+	"e0oalvvq",	
+	"qjdjfjbd",	
+	"k9i8e6sd",	
+	"d35eb1af",	
+	"0rxlk3z1",	
+	"1gaeqwkv",	
+	"f1vytlmj",	
+	"zakfvnsm",	
+	"6k9yggkf",	
+	"ozy1huwg",	
+	"z20b80td",	
+	"ro1khj99",	
+	"2try64a7",	
+	"7xwm9rm9",	
+	"ka1ho9h0"
 ]
-codeMetaKey = "sh_2024_code"
+codeMetaKey = "sh_2025_code"
 
 def getScavengerHuntProgress(collection: Collection, since=None):
 	filter = {f"meta.{codeMetaKey}": {"$exists": True}}
